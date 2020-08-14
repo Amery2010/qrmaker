@@ -24,6 +24,7 @@ const App: React.FC = () => {
   const [level, setLevel] = useState<string>('M')
   const [type, setType] = useState<string>('rect')
   const [posType, setPosType] = useState<string>('rect')
+  const [lineDirection, setLineDirection] = useState<string>('h-v')
   const [size, setSize] = useState<number>(100)
   const [opacity, setOpacity] = useState<number>(100)
   const [posColor, setPosColor] = useState<string>('#000000')
@@ -42,6 +43,9 @@ const App: React.FC = () => {
           break
         case 'posType':
           setPosType(val)
+          break
+        case 'lineDirection':
+          setLineDirection(val)
           break
         case 'size':
           setSize(parseInt(val))
@@ -122,6 +126,7 @@ const App: React.FC = () => {
               level,
               type,
               posType,
+              lineDirection,
               size,
               opacity,
               posColor,
@@ -161,8 +166,9 @@ const App: React.FC = () => {
                 <Form.Item name="type" label="信息点样式">
                   <Select>
                     <Option value="rect">矩形</Option>
-                    <Option value="round">圆形</Option>
-                    <Option value="rand">随机</Option>
+                    <Option value="line">线条</Option>
+                    <Option value="round">圆点</Option>
+                    <Option value="rand">随机圆点</Option>
                   </Select>
                 </Form.Item>
               </Col>
@@ -199,6 +205,21 @@ const App: React.FC = () => {
                 </Form.Item>
               </Col>
             </Row>
+            <Row gutter={{ xs: 0, md: 24 }}>
+              <Col xs={24} md={8}>
+                <Form.Item name="lineDirection" label="线条方向">
+                  <Select disabled={type !== 'line'}>
+                    <Option value="left-right">左右</Option>
+                    <Option value="up-down">上下</Option>
+                    <Option value="h-v">纵横</Option>
+                    <Option value="loop">回环</Option>
+                    <Option value="topLeft-bottomRight">左上右下</Option>
+                    <Option value="topRight-bottomLeft">右上左下</Option>
+                    <Option value="cross">交叉</Option>
+                  </Select>
+                </Form.Item>
+              </Col>
+            </Row>
           </Form>
           <div className={styles.preview}>
             <div ref={qrcodeRef}>
@@ -207,6 +228,7 @@ const App: React.FC = () => {
                 value={qrValue}
                 level={level}
                 type={type}
+                lineDirection={lineDirection}
                 posType={posType}
                 posColor={posColor}
                 otherColor={otherColor}
