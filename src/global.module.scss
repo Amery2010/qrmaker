@@ -48,6 +48,9 @@ body {
 }
 .qrcode {
   font-size: 0;
+  > rect {
+    shape-rendering: crispEdges;
+  }
 }
 
 @media (max-width: 800px) {
