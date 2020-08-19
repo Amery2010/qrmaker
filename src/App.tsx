@@ -167,6 +167,7 @@ const App: React.FC = () => {
                   <Select>
                     <Option value="rect">矩形</Option>
                     <Option value="line">线条</Option>
+                    <Option value="star">星星</Option>
                     <Option value="round">圆点</Option>
                     <Option value="rand">随机圆点</Option>
                   </Select>
@@ -238,7 +239,7 @@ const App: React.FC = () => {
                 logoScale={logoScale / 100}
               />
             </div>
-            <Button.Group>
+            <Button.Group className={styles.download}>
               <Button icon={<DownloadOutlined />} onClick={() => handleDownload('svg')}>SVG</Button>
               <Button icon={<DownloadOutlined />} onClick={() => handleDownload('png')}>PNG</Button>
             </Button.Group>
