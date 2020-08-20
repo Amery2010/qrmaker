@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { Row, Col, Form, Tabs, Input, Select, Button, Divider, message } from 'antd'
+import { Row, Col, Form, Tabs, Input, Select, AutoComplete, Button, Divider, message } from 'antd'
 import { DownloadOutlined } from '@ant-design/icons'
 import { QRNormal } from './components/QRCode'
 import ColorPicker from './components/ColorPicker'
@@ -11,12 +11,28 @@ import styles from './global.module.scss'
 type FormChangeValuesType = {
   [propName: string]: string
 }
+type HistoryOption = {
+  value: string
+}
 
 const { TextArea } = Input
 const { Option } = Select
 const { TabPane } = Tabs
 
 const LOGO_DEFAULT_SIZE = 80
+const HISTORY_DATA_NUM = 20
+
+let localHistoryData: string[] = []
+// 填充二维码生成历史记录
+const data = window.localStorage.getItem('historyData')
+if (data) {
+  try {
+    localHistoryData = JSON.parse(data)
+  } catch (err) {
+    console.error('初始化二维码生成历史记录数据失败！')
+    window.localStorage.removeItem('historyData')
+  }
+}
 
 const App: React.FC = () => {
   const qrcodeRef = useRef<HTMLDivElement>(null)
@@ -31,6 +47,7 @@ const App: React.FC = () => {
   const [otherColor, setOtherColor] = useState<string>('#000000')
   const [logo, setLogo] = useState<string>('')
   const [logoScale, setLogoScale] = useState<number>(100)
+  const [historyData, setHistoryData] = useState<HistoryOption[]>([])
 
   const handleValuesChange = async (changedValue: FormChangeValuesType) => {
     for (const [key, val] of Object.entries<string>(changedValue)) {
@@ -77,6 +94,33 @@ const App: React.FC = () => {
       }
     }
   }
+  const handleUrlChange = (value: string) => {
+    setQrValue(value)
+  }
+  const handleSearch = (value: string) => {
+    if (value) {
+      const data = localHistoryData.filter(item => item.toLowerCase().indexOf(value.toLowerCase()) >= 0)
+      setHistoryData(data.map(item => {
+        return { value: item }
+      }))
+    } else {
+      setHistoryData([])
+    }
+  }
+  const saveUrlHistory = () => {
+    const index = localHistoryData.indexOf(qrValue)
+    const value = qrValue.trim()
+    if (value !== '' && index !== 0) {
+      if (index > 0) {
+        localHistoryData.splice(index, 1)
+      }
+      localHistoryData.unshift(value)
+      if (localHistoryData.length > HISTORY_DATA_NUM) {
+        localHistoryData.splice(HISTORY_DATA_NUM - 1)
+      }
+      window.localStorage.setItem('historyData', JSON.stringify(localHistoryData))
+    }
+  }
   const handleValueChange = (ev: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setQrValue(ev.target.value)
   }
@@ -95,16 +139,25 @@ const App: React.FC = () => {
 
   useEffect(() => {
     document.title = '二维码生成工具'
+    // 填充二维码生成历史记录
+    setHistoryData(localHistoryData.map(item => {
+      return { value: item }
+    }))
   }, [])
   return (
     <div className={styles.app}>
       <main className={styles.content}>
         <Tabs className={styles.text} defaultActiveKey="1">
           <TabPane tab="网址" key="1">
-            <Input
-              placeholder="请输入网址"
-              onChange={handleValueChange}
-            ></Input>
+            <AutoComplete
+              style={{ width: '100%' }}
+              options={historyData}
+              onSearch={handleSearch}
+              onChange={handleUrlChange}
+              onBlur={saveUrlHistory}
+              notFoundContent={null}
+            >
+            </AutoComplete>
             <p className={styles.tip}>如果链接较长，推荐使用生成短链接二维码模式</p>
           </TabPane>
           <TabPane tab="文本" key="2">
